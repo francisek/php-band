@@ -1,0 +1,7 @@
+checkout:
+    post:
+        - git clone --depth 1 git@github.com:sstephenson/bats.git
+test:
+    override:
+        - bats/bin/bats test
+
