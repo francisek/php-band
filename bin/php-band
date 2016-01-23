@@ -29,8 +29,10 @@ Usage:
 Where option in
     -h or --help : displays this help  
     -v or --version : displays php_band version
+    --download php_version : download a php version from source 
     --install php_version : installs a php version from source 
     --src-format gz|bz2|xz : format of downloaded archive (default xz)
+    -c or --config file : load file to define genral config
 EOM
    exit 1 
 }
@@ -38,9 +40,17 @@ EOM
 error_exit() {
     local msg=$1
     local code=$2
-    echo -e "\033[0;31m$msg\033[0m"
-    [ "$code" = "" ] || code=1
+    echo -e "\033[41;37m$msg\033[0m"
+    [ -n $code ] || code=1
     exit $code
+}
+
+multicommand_error() {
+    error_exit "You must specify exactly one command" 2
+}
+
+unimplemented() {
+    echo -e "\033[45;37mUnimplemented $1\033[0m"
 }
 
 log_info() {
@@ -53,7 +63,7 @@ check_env() {
     [ "" != "$SED_BIN" -a -x "$SED_BIN" ] || error_exit "No sed binary" 1
 }
 
-show_version() {
+command_version() {
     echo "0.0.1"
     exit 0
 }
@@ -105,7 +115,7 @@ check_for_source() {
 
 # Commands
 
-command_install() {
+command_download() {
     parse_version $php_version
     if [ "$php_version_major" = "" -o "$php_version_minor" = "" -o "$php_version_patch" = "" ]; then
         error_exit "The version format is not valid" 1
@@ -114,10 +124,25 @@ command_install() {
     check_for_source
 }
 
+command_install() {
+    command_download
+    echo "Installing $php_version"
+}
+
+command_src_format() {
+    log_info "Source format is currently set to $src_format"
+}
+
 handle_command(){
     case "$run_command" in
+        --download)
+            command_download ;;
         --install)
             command_install;;
+        --src-format)
+            command_src_format;;
+        --version)
+            command_version;;
         *)
             error_exit "Unimplemented command $run_command"
             ;;
@@ -126,37 +151,48 @@ handle_command(){
 }
 
 # parse arguments
-args=$(getopt -l version,install:,help -o vh -- "$@")
+args=$(getopt -l 'version,install:,download:,config:,src-format::,help' -o vhc: -- "$@")
 eval set -- "$args"
 while true; do
     case "$1" in
         -v|--version)
-            show_version
+            [ "$run_command" != "" ] && multicommand_error
+            run_command="--version"
             ;;
-        --install)
+        --install|--download)
+            [ "$run_command" != "" ] && multicommand_error
             run_command="$1"
             php_version="$2"
             shift
             ;;
         --src-format)
             case "$2" in
-                gz|bz2)
+                xz|gz|bz2)
                     src_format="$2"
-                    ;;
+                    shift ;;
                 *)
-                    src_format="xz"
-                    ;;
+                    [ "$2" != "" ] && error_exit "Unknown source format $2" 2
+                    [ "$run_command" != "" ] && multicommand_error
+                    run_command="$1"
             esac
-            shift
             ;;
         -h|--help)
             show_usage
+            ;;
+        -c|--config)
+            unimplemented "--config option"
+            if [ -f "$2" ]; then
+                source "$2";
+            else
+                error_exit "No valid config file was specified"
+            fi
             ;;
         --)
             break;;
     esac
     shift
 done
+
 
 [ "x$run_command" = "x" ] && show_usage
 check_env

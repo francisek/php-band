@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 setup() {
     find archs -type f -iname "php-5.6.10.*" -exec rm {} \;
 }
@@ -10,6 +9,10 @@ flunk() {
     fi
   }
   return 1
+}
+
+assert_unimplemented() {
+    assert_line "Unimplemented $1"
 }
 
 assert_success() {
@@ -43,7 +46,7 @@ assert_equals() {
   local b=$(sanitize_ansi "$2")
   if [ "$a" != "$b" ]; then
     { echo "expected: $b"
-      echo "actual:   $2"
+      echo "actual  : $a"
     } | flunk
   fi
 }
