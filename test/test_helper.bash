@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 setup() {
     find archs -type f -iname "php-5.6.10.*" -exec rm {} \;
+        if [ -d src/php-5.6.10 ]; then
+            rm -rf src/php-5.6.10
+        fi
+        if [ -d inst/5.6.10 ]; then
+            rm -rf inst/5.6.10
+        fi
 }
 
 flunk() {
