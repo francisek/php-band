@@ -155,7 +155,7 @@ compile_php() {
         [ $? -eq 0 ] || error_exit "Compilation of php failed" 3
         touch .built
     fi
-    make install
+    make install INSTALL_ROOT="$php_inst_dir"
     [ $? -eq 0 ] || error_exit "Installation of php failed" 3
 }
 # Commands

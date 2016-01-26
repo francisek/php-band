@@ -22,6 +22,8 @@ load test_helper
     run bin/php-band --install 5.6.10
     [ -f "archs/php-5.6.10.tar.xz" ]
     [ -d "src/php-5.6.10" ]
+    [ -f "src/php-5.6.10/.configured" ]
+    [ -f "src/php-5.6.10/.built" ]
     [ -f "inst/5.6.10/test" ]
 }
 
@@ -31,8 +33,11 @@ load test_helper
     fi
     run bin/php-band --install 5.6.10
     assert_line_contains "PHP 5.6.10 has been downloaded"
+    [ -f "archs/php-5.6.10.tar.xz" ]
+    [ -d "src/php-5.6.10" ]
+    [ -f "src/php-5.6.10/.configured" ]
+    [ -f "src/php-5.6.10/.built" ]
+    [ -f "inst/5.6.10/bin/php" ]
     assert_status 0
-    [ -f "../archs/php-5.6.10.tar.xz" ]
-    [ -d "../src/php-5.6.10" ]
 }
 
