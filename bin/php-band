@@ -1,7 +1,9 @@
 #!/bin/bash
 
 PHP_BAND_NAME=$(basename "$0")
-BAND_DIR=$(dirname "$(dirname \"$(readlink -f \\\"$0\\\")\")")
+pushd "$(dirname $0)" > /dev/null
+BAND_DIR=$(dirname $(pwd -P))
+popd > /dev/null
 ARCH_DIR=${BAND_DIR}/archs
 INST_DIR=${BAND_DIR}/inst
 php_src_dirname=
@@ -155,7 +157,7 @@ compile_php() {
         [ $? -eq 0 ] || error_exit "Compilation of php failed" 3
         touch .built
     fi
-    make install INSTALL_ROOT="$php_inst_dir"
+    make install
     [ $? -eq 0 ] || error_exit "Installation of php failed" 3
 }
 # Commands
