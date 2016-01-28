@@ -6,6 +6,7 @@ BAND_DIR=$(dirname $(pwd -P))
 popd > /dev/null
 ARCH_DIR=${BAND_DIR}/archs
 INST_DIR=${BAND_DIR}/inst
+CONFIG_DIR=${BAND_DIR}/config
 php_src_dirname=
 SRC_DIR=${BAND_DIR}/src
 # local vars
@@ -19,7 +20,7 @@ php_version_patch=
 php_version_addon=
 php_prefered_sites=(
     'http://museum.php.net/php${php_version_major}/${arch_filename}' 
-    'http://www.php.net/get/${arch_filename}/from/this/mirror'
+    'http://docs.php.net/distributions/${arch_filename}'
 )
 # configurable options
 php_inst_dir=
@@ -27,6 +28,26 @@ php_config_options=
 
 source $BAND_DIR/lib/core.sh
 # Commands
+
+show_usage() {
+    cat << EOM
+Usage:
+    ${PHP_BAND_NAME} [option] [...]
+Where option in
+    -h or --help : displays this help  
+    -v or --version : displays php_band version
+    --download php_version : download a php version from source 
+    --install php_version : installs a php version from source 
+    --src-format gz|bz2|xz : format of downloaded archive (default xz)
+    -c or --config file : load file to define genral config
+EOM
+   exit 1 
+}
+
+command_version() {
+    echo "0.0.1"
+    exit 0
+}
 
 command_download() {
     parse_version $php_version

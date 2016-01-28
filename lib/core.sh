@@ -5,20 +5,6 @@ SED_BIN=$($WHICH_BIN sed)
 WGET_BIN=$($WHICH_BIN wget)
 TAR_BIN=$($WHICH_BIN tar)
 
-show_usage() {
-    cat << EOM
-Usage:
-    ${PHP_BAND_NAME} [option] [...]
-Where option in
-    -h or --help : displays this help  
-    -v or --version : displays php_band version
-    --download php_version : download a php version from source 
-    --install php_version : installs a php version from source 
-    --src-format gz|bz2|xz : format of downloaded archive (default xz)
-    -c or --config file : load file to define genral config
-EOM
-   exit 1 
-}
 
 error_exit() {
     local msg=$1
@@ -34,6 +20,7 @@ multicommand_error() {
 
 unimplemented() {
     echo -e "\033[45;37mUnimplemented $1\033[0m"
+    [ -f "$base_config_file.sh" ] && source "$base_config_file.sh" ${version_components[@]}
 }
 
 log_info() {
@@ -45,11 +32,6 @@ check_env() {
     [ "" != "$WGET_BIN" -a -x "$WGET_BIN" ] || error_exit "No wget binary" 1
     [ "" != "$SED_BIN" -a -x "$SED_BIN" ] || error_exit "No sed binary" 1
     [ "" != "$TAR_BIN" -a -x "$TAR_BIN" ] || error_exit "No tar binary" 1
-}
-
-command_version() {
-    echo "0.0.1"
-    exit 0
 }
 
 parse_version() {
@@ -75,30 +57,44 @@ apply_shell_expansion() {
 
 # check for source
 build_source_filename() {
-    arch_filename=$(printf "php-%s.%s.%s%s.tar.%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" "$src_format" )
+    printf "php-%s.%s.%s%s.tar.%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" "$src_format" 
 }
 
 build_php_src_dirname() {
-    php_src_dirname=$(printf "php-%s.%s.%s%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" )
+    printf "php-%s.%s.%s%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" 
 }
 
-get_configure_options() {
+get_per_version_config() {
+    local base_config_file=$(basename "$1")
+    local config_dir=$(dirname "$1")
+    shift
+    local x="$*"
+    [ -f "$config_dir/${base_config_file}" ] && source "$config_dir/$base_config_file" $x
+    while [ $# -gt 0 -a "$1" != "" ]; do
+        config_dir="$config_dir/$1"
+        [ -f "$config_dir/${base_config_file}" ] && source "$config_dir/${base_config_file}" $x
+        shift
+    done
+
+}
+
+configure_php() {
     php_inst_dir="$INST_DIR/$php_version"
     php_config_options="--disable-all"
-    # @todo get per version configuration
+    get_per_version_config "$CONFIG_DIR/configure-php.sh" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon"
 }
 
 check_for_source() {
     local host
     local srcfile
-    build_source_filename
+    local arch_filename=$(build_source_filename) 
     srcfile="$ARCH_DIR/$arch_filename"
     [ -f "$srcfile" ] && return
     for i in ${php_prefered_sites[@]}; do
-        host="$(apply_shell_expansion "${i%%}")"
+        host=$(apply_shell_expansion "${i%%}")
         log_info "Attempting to download from $host"
         $WGET_BIN -P "$ARCH_DIR" -O "$srcfile" "$host"
-        [ ! -s "$srcfile" -a -f "$srcfile" ] && rm "$srcfile"
+        [ -f "$srcfile" ] && !($TAR_BIN -tf "$srcfile" >& /dev/null) && rm "$srcfile"
         if [ -f "$srcfile" ]; then
             log_info "PHP $php_version has been downloaded"
             return
@@ -108,30 +104,52 @@ check_for_source() {
 }
 
 extract_source() {
-    build_source_filename
+    local arch_filename=$(build_source_filename)
     [ -r "$ARCH_DIR/$arch_filename" ] || error_exit "The file $arch_filename is not readable" 3
     $TAR_BIN -xf "$ARCH_DIR/$arch_filename" -C $SRC_DIR
     [ $? -ne 0 ] && error_exit "$arch_filename does not seem to be a valid archive" 3
 }
 
+pre_configure_php() {
+    # Pre configure can be overriden in specific config files config-php.sh
+    return
+}
+
+post_configure_php() {
+    # Post configure be overriden in specific config files config-php.sh
+    return
+}
+
+pre_compile_php() {
+    # Pre compile can be overriden in specific config files config-php.sh
+    return
+}
+
+post_compile_php() {
+    # Pre compile can be overriden in specific config files config-php.sh
+    return
+}
 
 compile_php() {
     echo "Installing $php_version"
-    build_php_src_dirname
-    cd "$SRC_DIR/$php_src_dirname"
-    get_configure_options
+    
+    cd "$SRC_DIR/"$(build_php_src_dirname)
+    configure_php
     if [ ! -f .configured ]; then
+        pre_configure_php
         ./configure \
             --prefix="$php_inst_dir" \
             --exec-prefix="$php_inst_dir" \
-            --disable-all \
             $php_config_options
         [ $? -eq 0 ] || error_exit "Configuration of php failed" 3
+        post_configure_php
         touch .configured
     fi
     if [ ! -f .built ]; then
+        pre_compile_php
         make
         [ $? -eq 0 ] || error_exit "Compilation of php failed" 3
+        post_compile_php
         touch .built
     fi
     make install
