@@ -94,7 +94,7 @@ You can define some variables and functions to customize the version you are ins
 
 ## Alterable variables and functions
 
-+ *php_config_options* takes any argument that php's *configure* accepts except "--prefix" and "--exec-prefix".
++ *php_band_php_config_options* takes any argument that php's *configure* accepts except "--prefix" and "--exec-prefix".
 Its default value is defined to "--disable-all".
 + *pre_configure_php()* is called before php's *configure*
 + *post_configure_php()* is called after a successfull php's *configure*
@@ -106,9 +106,9 @@ Its default value is defined to "--disable-all".
 
 Those variables can be used but should not be modified:
 
-+ *INST_DIR* Directory for all installations
-+ *SRC_DIR* Directory for all sources
-+ *php_inst_dir* Directory into wich the current php will installed
++ *PHP_BAND_INST_DIR* Directory for all installations
++ *PHP_BAND_SOURCE_DIR* Directory for all sources
++ *php_band_php_install_dir* Directory into wich the current php will installed
 
 ## Usefull functions
 

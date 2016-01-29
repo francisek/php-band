@@ -16,7 +16,7 @@ setup() {
     local php_version_minor
     local php_version_patch
     local php_version_addon
-    parse_version "10.20.30RC1"
+    php_band_parse_version "10.20.30RC1"
     assert_equals "$php_version_major" "10"
     assert_equals "$php_version_minor" "20"
     assert_equals "$php_version_patch" "30"
@@ -27,7 +27,7 @@ setup() {
     local str='$hello $world'
     local hello='Hello'
     local world='World'
-    local res=$(apply_shell_expansion "$str")
+    local res=$(php_band_apply_shell_expansion "$str")
     [ "$res" != "$str" ]
     [ "$res" = "Hello World" ]
 }
@@ -37,9 +37,9 @@ setup() {
     local php_version_minor='20'
     local php_version_patch='30'
     local php_version_addon='RC40'
-    local src_format='xx'
-    local arch_filename=$(build_source_filename)
-    assert_equals "$arch_filename" "php-10.20.30RC40.tar.xx"
+    local php_band_source_archive_format='xx'
+    local php_band_archive_filename=$(php_band_build_source_filename)
+    assert_equals "$php_band_archive_filename" "php-10.20.30RC40.tar.xx"
 }
 
 @test "Build source dirname from php version" {
@@ -47,7 +47,7 @@ setup() {
     local php_version_minor='20'
     local php_version_patch='30'
     local php_version_addon='RC40'
-    local php_src_dirname=$(build_php_src_dirname)
+    local php_src_dirname=$(php_band_build_php_source_dirname)
     assert_equals "$php_src_dirname" "php-10.20.30RC40"
 }
 

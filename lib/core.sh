@@ -14,11 +14,11 @@ error_exit() {
     exit $code
 }
 
-multicommand_error() {
+php_band_multicommand_error() {
     error_exit "You must specify exactly one command" 2
 }
 
-unimplemented() {
+php_band_unimplemented() {
     echo -e "\033[45;37mUnimplemented $1\033[0m"
     [ -f "$base_config_file.sh" ] && source "$base_config_file.sh" ${version_components[@]}
 }
@@ -27,14 +27,14 @@ log_info() {
     echo -e "\033[0;30m$1\033[0m"
 }
 
-check_env() {
+php_band_check_env() {
     [ "" != "$WHICH_BIN" -a -x "$WHICH_BIN" ] || error_exit "No which binary" 1
     [ "" != "$WGET_BIN" -a -x "$WGET_BIN" ] || error_exit "No wget binary" 1
     [ "" != "$SED_BIN" -a -x "$SED_BIN" ] || error_exit "No sed binary" 1
     [ "" != "$TAR_BIN" -a -x "$TAR_BIN" ] || error_exit "No tar binary" 1
 }
 
-parse_version() {
+php_band_parse_version() {
     local ver=$1
     php_version_major=${ver%%.*}
     ver=${ver#$php_version_major.}
@@ -48,7 +48,7 @@ parse_version() {
     fi
 }
 # utilities
-apply_shell_expansion() {
+php_band_apply_shell_expansion() {
     declare data=$1
     declare delimiter="__apply_shell_expansion_delimiter__"
     declare command="cat <<$delimiter"$'\n'"$data"$'\n'"$delimiter"
@@ -56,11 +56,11 @@ apply_shell_expansion() {
 }
 
 # check for source
-build_source_filename() {
-    printf "php-%s.%s.%s%s.tar.%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" "$src_format" 
+php_band_build_source_filename() {
+    printf "php-%s.%s.%s%s.tar.%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" "$php_band_source_archive_format" 
 }
 
-build_php_src_dirname() {
+php_band_build_php_source_dirname() {
     printf "php-%s.%s.%s%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" 
 }
 
@@ -78,22 +78,22 @@ get_per_version_config() {
 
 }
 
-configure_php() {
-    php_inst_dir="$INST_DIR/$php_version"
-    php_config_options="--disable-all"
-    get_per_version_config "$CONFIG_DIR/configure-php.sh" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon"
+php_band_configure_php() {
+    php_band_php_install_dir="$PHP_BAND_INST_DIR/$php_version"
+    php_band_php_config_options="--disable-all"
+    get_per_version_config "$PHP_BAND_CONFIG_DIR/configure-php.sh" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon"
 }
 
-check_for_source() {
+php_band_check_for_source() {
     local host
     local srcfile
-    local arch_filename=$(build_source_filename) 
-    srcfile="$ARCH_DIR/$arch_filename"
+    local php_band_archive_filename=$(php_band_build_source_filename) 
+    srcfile="$PHP_BAND_ARCH_DIR/$php_band_archive_filename"
     [ -f "$srcfile" ] && return
     for i in ${php_prefered_sites[@]}; do
-        host=$(apply_shell_expansion "${i%%}")
+        host=$(php_band_apply_shell_expansion "${i%%}")
         log_info "Attempting to download from $host"
-        $WGET_BIN -P "$ARCH_DIR" -O "$srcfile" "$host"
+        $WGET_BIN -P "$PHP_BAND_ARCH_DIR" -O "$srcfile" "$host"
         [ -f "$srcfile" ] && !($TAR_BIN -tf "$srcfile" >& /dev/null) && rm "$srcfile"
         if [ -f "$srcfile" ]; then
             log_info "PHP $php_version has been downloaded"
@@ -103,11 +103,11 @@ check_for_source() {
     error_exit "Unable to download PHP source" 2
 }
 
-extract_source() {
-    local arch_filename=$(build_source_filename)
-    [ -r "$ARCH_DIR/$arch_filename" ] || error_exit "The file $arch_filename is not readable" 3
-    $TAR_BIN -xf "$ARCH_DIR/$arch_filename" -C $SRC_DIR
-    [ $? -ne 0 ] && error_exit "$arch_filename does not seem to be a valid archive" 3
+php_band_extract_php_source() {
+    local php_band_archive_filename=$(php_band_build_source_filename)
+    [ -r "$PHP_BAND_ARCH_DIR/$php_band_archive_filename" ] || error_exit "The file $php_band_archive_filename is not readable" 3
+    $TAR_BIN -xf "$PHP_BAND_ARCH_DIR/$php_band_archive_filename" -C $PHP_BAND_SOURCE_DIR
+    [ $? -ne 0 ] && error_exit "$php_band_archive_filename does not seem to be a valid archive" 3
 }
 
 pre_configure_php() {
@@ -136,17 +136,17 @@ post_install_php() {
 }
 
 
-compile_php() {
+php_band_compile_php() {
     echo "Installing $php_version"
     
-    cd "$SRC_DIR/"$(build_php_src_dirname)
-    configure_php
+    cd "$PHP_BAND_SOURCE_DIR/"$(php_band_build_php_source_dirname)
+    php_band_configure_php
     if [ ! -f .configured ]; then
         pre_configure_php
         ./configure \
-            --prefix="$php_inst_dir" \
-            --exec-prefix="$php_inst_dir" \
-            $php_config_options
+            --prefix="$php_band_php_install_dir" \
+            --exec-prefix="$php_band_php_install_dir" \
+            $php_band_php_config_options
         [ $? -eq 0 ] || error_exit "Configuration of php failed" 3
         post_configure_php
         touch .configured
