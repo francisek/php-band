@@ -39,7 +39,6 @@ Where option in
     --download php_version : download a php version from source 
     --install php_version : installs a php version from source 
     --src-format gz|bz2|xz : format of downloaded archive (default xz)
-    -c or --config file : load file to define genral config
 EOM
    exit 1 
 }
@@ -114,14 +113,6 @@ while true; do
             ;;
         -h|--help)
             show_usage
-            ;;
-        -c|--config)
-            unimplemented "--config option"
-            if [ -f "$2" ]; then
-                source "$2";
-            else
-                error_exit "No valid config file was specified"
-            fi
             ;;
         --)
             break;;

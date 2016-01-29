@@ -52,20 +52,21 @@ What does php-band is :
 + switches to php tource directory
 + reads per-version configuration
 + if not already, configures php:
-    + runs the pre_configure_php function
+    + runs the *pre_configure_php()* function
     + runs configure
-    + runs the post_configure_php function if configure was successfull
+    + runs the *post_configure_php()* function if configure was successfull
     + marks the version as configured
 + if not already compiled
-    + runs the pre_compile_php function
+    + runs the *pre_compile_php()* function
     + compiles php
-    + runs the post_compile_php function if compilation was successfull
+    + runs the *post_compile_php()* function if compilation was successfull
     + marks the version as built
 + installs php to inst/<version>
++ runs *post_install_php()* function if installation was successfull
 
 # Custom configuration
 
-# How it works
+## How it works
 
 You can define custom configuration to plot any version.
 The version-independant configurations reside in the *config* directory.
@@ -86,7 +87,7 @@ Then if major version is 5, *./config/5/configure-php.sh* overrides the previous
 Then if major version is 5 and minor version is 6, *.config/5/6/configure-php.sh* overrides the previous configuration.
 And so on ...
 
-# What you can do
+## What you can do
 
 Each version-matching *configure-php.sh* file is sourced into php-band with the version components as arguments (major, minor, patch and addon).
 You can define some variables and functions to customize the version you are installing.
@@ -98,7 +99,8 @@ Its default value is defined to "--disable-all".
 + *pre_configure_php()* is called before php's *configure*
 + *post_configure_php()* is called after a successfull php's *configure*
 + *pre_compile_php()* is called before php's *make*
-+ *post_compile()* is called after a successfull php's *make*
++ *post_compile_php()* is called after a successfull php's *make*
++ *post_install_php()* is called after a successfull php's *make install*
 
 ## Readonly variables
 
@@ -107,4 +109,23 @@ Those variables can be used but should not be modified:
 + *INST_DIR* Directory for all installations
 + *SRC_DIR* Directory for all sources
 + *php_inst_dir* Directory into wich the current php will installed
+
+## Usefull functions
+
+Some core functions may be usefull in your functions :
+
++ *error_exit(error_message [, error_code])* 
+  Displays the error_message and exits error_code
++ *log_info(message)* 
+  Displays a message
++ *get_per_version_config(base_config_filename [, major_version][, minor_version][,patch_version][, ...])*
+  Sources all config files matching the version, starting from the less sibling.
+
+# Best practises in writing configuration files
+
+The configuration file
++ must not override protected variables
++ should not create global variables
++ if global variables are created, they should be prefixed with the *CUSTOM_* or *custom_* string (optionaly followed by your suffix)
++ functions not accepted by php-band should be prefixed by *custom_* (optionnally followed by you suffix)
 

@@ -126,9 +126,15 @@ pre_compile_php() {
 }
 
 post_compile_php() {
-    # Pre compile can be overriden in specific config files config-php.sh
+    # Post compile can be overriden in specific config files config-php.sh
     return
 }
+
+post_install_php() {
+    # Post install can be overriden in specific config files config-php.sh
+    return
+}
+
 
 compile_php() {
     echo "Installing $php_version"
@@ -154,5 +160,6 @@ compile_php() {
     fi
     make install
     [ $? -eq 0 ] || error_exit "Installation of php failed" 3
+    post_install_php
 }
 

@@ -14,10 +14,3 @@ load test_helper
     assert_status 1
 }
 
-
-@test "Call php-band with alternate config file is unimplemented" {
-    run bin/php-band --config /dev/null
-    assert_unimplemented "--config option" 
-}
-
-
