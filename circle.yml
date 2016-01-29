@@ -1,0 +1,14 @@
+machine:
+    environment:
+        PHP_BAND_TEST_COMPILATION: 1
+
+dependencies:
+    pre:
+        - sudo apt-get update ; sudo apt-get install autoconf bison automake libtool re2c flex
+checkout:
+    post:
+        - git clone --depth 1 git@github.com:sstephenson/bats.git
+test:
+    override:
+        - bats/bin/bats test
+

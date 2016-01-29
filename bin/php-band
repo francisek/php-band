@@ -1,0 +1,126 @@
+#!/bin/bash
+
+PHP_BAND_NAME=$(basename "$0")
+pushd "$(dirname $0)" > /dev/null
+PHP_BAND_ROOT_DIR=$(dirname $(pwd -P))
+popd > /dev/null
+PHP_BAND_ARCH_DIR=${PHP_BAND_ROOT_DIR}/archs
+PHP_BAND_INST_DIR=${PHP_BAND_ROOT_DIR}/inst
+PHP_BAND_CONFIG_DIR=${PHP_BAND_ROOT_DIR}/config
+PHP_BAND_SOURCE_DIR=${PHP_BAND_ROOT_DIR}/src
+# local vars
+php_band_command_to_run=
+php_band_source_archive_format="xz"
+php_band_archive_filename=
+php_version=
+php_version_major=
+php_version_minor=
+php_version_patch=
+php_version_addon=
+php_prefered_sites=(
+    'http://museum.php.net/php${php_version_major}/${php_band_archive_filename}' 
+    'http://docs.php.net/distributions/${php_band_archive_filename}'
+)
+# configurable options
+php_band_php_install_dir=
+php_band_php_config_options=
+
+source $PHP_BAND_ROOT_DIR/lib/core.sh
+# Commands
+
+show_usage() {
+    cat << EOM
+Usage:
+    ${PHP_BAND_NAME} [option] [...]
+Where option in
+    -h or --help : displays this help  
+    -v or --version : displays php_band version
+    --download php_version : download a php version from source 
+    --install php_version : installs a php version from source 
+    --src-format gz|bz2|xz : format of downloaded archive (default xz)
+EOM
+   exit 1 
+}
+
+command_version() {
+    echo "0.0.1"
+    exit 0
+}
+
+command_download() {
+    php_band_parse_version $php_version
+    if [ "$php_version_major" = "" -o "$php_version_minor" = "" -o "$php_version_patch" = "" ]; then
+        error_exit "The version format is not valid" 1
+    fi
+    php_band_build_source_filename
+    php_band_check_for_source
+}
+
+command_install() {
+    php_band_parse_version $php_version
+    command_download
+    php_band_extract_php_source
+    php_band_compile_php
+}
+
+command_src_format() {
+    log_info "Source format is currently set to $php_band_source_archive_format"
+}
+
+handle_command(){
+    case "$php_band_command_to_run" in
+        --download)
+            command_download ;;
+        --install)
+            command_install;;
+        --src-format)
+            command_src_format;;
+        --version)
+            command_version;;
+        *)
+            error_exit "Unimplemented command $php_band_command_to_run"
+            ;;
+   esac
+
+}
+
+# parse arguments
+args=$(getopt -l 'version,install:,download:,config:,src-format::,help' -o vhc: -- "$@")
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -v|--version)
+            [ "$php_band_command_to_run" != "" ] && php_band_multicommand_error
+            php_band_command_to_run="--version"
+            ;;
+        --install|--download)
+            [ "$php_band_command_to_run" != "" ] && php_band_multicommand_error
+            php_band_command_to_run="$1"
+            php_version="$2"
+            shift
+            ;;
+        --src-format)
+            case "$2" in
+                xz|gz|bz2)
+                    php_band_source_archive_format="$2"
+                    shift ;;
+                *)
+                    [ "$2" != "" ] && error_exit "Unknown source format $2" 2
+                    [ "$php_band_command_to_run" != "" ] && php_band_multicommand_error
+                    php_band_command_to_run="$1"
+            esac
+            ;;
+        -h|--help)
+            show_usage
+            ;;
+        --)
+            break;;
+    esac
+    shift
+done
+
+
+[ "x$php_band_command_to_run" = "x" ] && show_usage
+php_band_check_env
+handle_command
+exit 0
