@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Php-band by francisek</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Php-band</h1>
+        <p>A bash application to manage compilation of multiple php versions</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/francisek/php-band" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/francisek/php-band/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/francisek/php-band/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>
+<a id="php-band" class="anchor" href="#php-band" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>php-band</h1>
+
+<p><img src="https://circleci.com/gh/francisek/php-band/tree/master.svg?style=shield&amp;circle-token=0e2b5681405bbc52e77bce982d74c449b46636d8"></p>
+
+<p>A simple bash tool to compile php versions</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>Just clone the repository</p>
+
+<pre><code>git clone git@github.com:francisek/php-band
+</code></pre>
+
+<h1>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h1>
+
+<p>To compile a PHP version, you will need:</p>
+
+<ul>
+<li>a bash shell with which, tar, sed and wget commands available </li>
+<li>any requirement for PHP compilation (<a href="http://php.net/manual/en/install.unix.php">http://php.net/manual/en/install.unix.php</a>)</li>
+</ul>
+
+<h1>
+<a id="using-php-band" class="anchor" href="#using-php-band" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using php-band</h1>
+
+<p>Run</p>
+
+<pre><code>bin/php-band --help
+</code></pre>
+
+<p>to get help on how to run this tool.</p>
+
+<h1>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running tests</h1>
+
+<p>The test suite uses the bats framework.
+Install it from repository:</p>
+
+<pre><code>git clone --depth 1 git@github.com:sstephenson/bats.git
+</code></pre>
+
+<p>Then run the tests :</p>
+
+<pre><code>./bats/bin/bats tests
+</code></pre>
+
+<p>if you want also to fully compile php while testing, you have to set the environment variable PHP_BAND_TEST_COMPILATION.</p>
+
+<h1>
+<a id="the-compilation-process" class="anchor" href="#the-compilation-process" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The compilation process</h1>
+
+<p>What does php-band is :</p>
+
+<ul>
+<li>check the validity of the version</li>
+<li>if it does not exist, attempts to download the php archive from a list of prefered sites</li>
+<li>if the php source directory does not exist, extract it from the archive into src directory</li>
+<li>switches to php tource directory</li>
+<li>reads per-version configuration</li>
+<li>if not already, configures php:
+
+<ul>
+<li>runs the <em>pre_configure_php()</em> function</li>
+<li>runs configure</li>
+<li>runs the <em>post_configure_php()</em> function if configure was successfull</li>
+<li>marks the version as configured</li>
+</ul>
+</li>
+<li>if not already compiled
+
+<ul>
+<li>runs the <em>pre_compile_php()</em> function</li>
+<li>compiles php</li>
+<li>runs the <em>post_compile_php()</em> function if compilation was successfull</li>
+<li>marks the version as built</li>
+</ul>
+</li>
+<li>installs php to inst/</li>
+<li>runs <em>post_install_php()</em> function if installation was successfull</li>
+</ul>
+
+<h1>
+<a id="custom-configuration" class="anchor" href="#custom-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Custom configuration</h1>
+
+<h2>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How it works</h2>
+
+<p>You can define custom configuration to plot any version.
+The version-independant configurations reside in the <em>config</em> directory.
+The you can plot a specific version configuration in a version-like subtree of the <em>config</em> directory.
+To get it clear, look at this example of config tree:</p>
+
+<pre><code>./config
+  + configure-php.sh
+  + 5/
+    + configure-php.sh
+    + 6/
+      + configure-php.sh
+</code></pre>
+
+<p>php-band will use first <em>./config/configure-php.sh</em> for any version.
+Then if major version is 5, <em>./config/5/configure-php.sh</em> overrides the previous configuration.
+Then if major version is 5 and minor version is 6, <em>.config/5/6/configure-php.sh</em> overrides the previous configuration.
+And so on ...</p>
+
+<h2>
+<a id="what-you-can-do" class="anchor" href="#what-you-can-do" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What you can do</h2>
+
+<p>Each version-matching <em>configure-php.sh</em> file is sourced into php-band with the version components as arguments (major, minor, patch and addon).
+You can define some variables and functions to customize the version you are installing.</p>
+
+<h2>
+<a id="alterable-variables-and-functions" class="anchor" href="#alterable-variables-and-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Alterable variables and functions</h2>
+
+<ul>
+<li>
+<em>php_band_php_config_options</em> takes any argument that php's <em>configure</em> accepts except "--prefix" and "--exec-prefix".
+Its default value is defined to "--disable-all".</li>
+<li>
+<em>pre_configure_php()</em> is called before php's <em>configure</em>
+</li>
+<li>
+<em>post_configure_php()</em> is called after a successfull php's <em>configure</em>
+</li>
+<li>
+<em>pre_compile_php()</em> is called before php's <em>make</em>
+</li>
+<li>
+<em>post_compile_php()</em> is called after a successfull php's <em>make</em>
+</li>
+<li>
+<em>post_install_php()</em> is called after a successfull php's <em>make install</em>
+</li>
+</ul>
+
+<h2>
+<a id="readonly-variables" class="anchor" href="#readonly-variables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Readonly variables</h2>
+
+<p>Those variables can be used but should not be modified:</p>
+
+<ul>
+<li>
+<em>PHP_BAND_INST_DIR</em> Directory for all installations</li>
+<li>
+<em>PHP_BAND_SOURCE_DIR</em> Directory for all sources</li>
+<li>
+<em>php_band_php_install_dir</em> Directory into wich the current php will installed</li>
+</ul>
+
+<h2>
+<a id="usefull-functions" class="anchor" href="#usefull-functions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usefull functions</h2>
+
+<p>Some core functions may be usefull in your functions :</p>
+
+<ul>
+<li>
+<em>error_exit(error_message [, error_code])</em> 
+Displays the error_message and exits error_code</li>
+<li>
+<em>log_info(message)</em> 
+Displays a message</li>
+<li>
+<em>get_per_version_config(base_config_filename [, major_version][, minor_version][,patch_version][, ...])</em>
+Sources all config files matching the version, starting from the less sibling.</li>
+</ul>
+
+<h1>
+<a id="best-practises-in-writing-configuration-files" class="anchor" href="#best-practises-in-writing-configuration-files" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Best practises in writing configuration files</h1>
+
+<p>The configuration file</p>
+
+<ul>
+<li>must not override protected variables</li>
+<li>should not create global variables</li>
+<li>if global variables are created, they should be prefixed with the <em>CUSTOM_</em> or <em>custom_</em> string (optionaly followed by your suffix)</li>
+<li>functions not accepted by php-band should be prefixed by <em>custom_</em> (optionnally followed by you suffix)</li>
+</ul>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/francisek">francisek</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
