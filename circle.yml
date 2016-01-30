@@ -11,4 +11,8 @@ checkout:
 test:
     override:
         - bats/bin/bats test
+general:
+  branches:
+    ignore:
+      - gh-pages # list of branches to ignore
 
