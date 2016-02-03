@@ -55,6 +55,16 @@ php_band_apply_shell_expansion() {
     eval "$command"
 }
 
+# Subst {{varname}} with ${varname}} 
+# If no variable with that name exists, the placeholder is substed with empty string
+php_band_substitute() {
+    local filename="$1"
+    local v
+    v=$(sed -r -e "s/\{\{([^\}]+)\}\}/\${\1}/g" "$filename")
+    v=$(php_band_apply_shell_expansion "$v")
+    echo "$v" > "$filename"
+}
+
 # check for source
 php_band_build_source_filename() {
     printf "php-%s.%s.%s%s.tar.%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" "$php_band_source_archive_format" 

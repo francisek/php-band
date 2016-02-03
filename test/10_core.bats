@@ -84,3 +84,21 @@ setup() {
     assert_equals "$test_addon" "test_addon RC40"
 }
 
+@test "Test inplace substitution of variable in a file" {
+    local sometext="it"
+    local othertext="works"
+    local filename="$BATS_TMPDIR/php-band-test-substitution"
+    local expected=$(cat << EOF
+Yes, it works.
+it
+EOF
+)
+    local result
+    cat << EOF > "$filename"
+Yes, {{sometext}} {{othertext}}.
+{{sometext}}{{unknown}}
+EOF
+    php_band_substitute "$filename"
+    result=$(cat "$filename")
+    assert_equals "$result" "$expected"
+}

@@ -109,6 +109,12 @@ Those variables can be used but should not be modified:
 + *PHP_BAND_INST_DIR* Directory for all installations
 + *PHP_BAND_SOURCE_DIR* Directory for all sources
 + *php_band_php_install_dir* Directory into wich the current php will installed
++ *php_version}} The full php version string (for example 5.6.3RC2)
++ *php_version_major* The php major version (for example 5)
++ *php_version_minor* The php minor version (for example 6)
++ *php_version_patch* The php patch version (for example 3)
++ *php_version_addon* The php version (for example RC2)
++ *php_band_php_install_dir* The directory where php is installed
 
 ## Usefull functions
 
@@ -120,6 +126,16 @@ Some core functions may be usefull in your functions :
   Displays a message
 + *get_per_version_config(base_config_filename [, major_version][, minor_version][,patch_version][, ...])*
   Sources all config files matching the version, starting from the less sibling.
++ *php_band_substitute(filename)*
+  Substitute placeholder with corresponding variable value.
+  A placeholder is the name of the variable enclosed by double brackets.
+  Most usefull placeholders are:
+  + {{php_version}} The full php version string (for example 5.6.3RC2)
+  + {{php_version_major}} The php major version (for example 5)
+  + {{php_version_minor}} The php minor version (for example 6)
+  + {{php_version_patch}} The php patch version (for example 3)
+  + {{php_version_addon}} The php version (for example RC2)
+  + {{php_band_php_install_dir}} The directory where php is installed
 
 # Best practises in writing configuration files
 
