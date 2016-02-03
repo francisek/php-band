@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 setup() {
     find archs -type f -iname "php-5.6.10.*" -exec rm {} \;
-        if [ -d src/php-5.6.10 ]; then
-            rm -rf src/php-5.6.10
-        fi
-        if [ -d inst/5.6.10 ]; then
-            rm -rf inst/5.6.10
-        fi
+    if [ -d src/php-5.6.10 ]; then
+        rm -rf src/php-5.6.10
+    fi
+    if [ -d inst/5.6.2 ]; then
+        rm -rf inst/5.6.2
+    fi
+    if [ -d inst/5.6.10 ]; then
+        rm -rf inst/5.6.10
+    fi
 }
 
 flunk() {
@@ -51,8 +54,8 @@ assert_equals() {
   local a=$(sanitize_ansi "$1")
   local b=$(sanitize_ansi "$2")
   if [ "$a" != "$b" ]; then
-    { echo "expected: $b"
-      echo "actual  : $a"
+    { echo "expected: $a"
+      echo "actual  : $b"
     } | flunk
   fi
 }

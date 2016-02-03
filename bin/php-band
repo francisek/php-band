@@ -43,7 +43,7 @@ EOM
 }
 
 command_version() {
-    echo "0.0.1"
+    echo "0.1.0"
     exit 0
 }
 
@@ -67,12 +67,21 @@ command_src_format() {
     log_info "Source format is currently set to $php_band_source_archive_format"
 }
 
+command_list_installed() {
+    local list=$(ls -1bv "$PHP_BAND_INST_DIR")
+    if [ "$list" != "" ]; then
+        log_info "$list"
+    fi
+}
+
 handle_command(){
     case "$php_band_command_to_run" in
         --download)
             command_download ;;
         --install)
             command_install;;
+        --list-installed)
+            command_list_installed;;
         --src-format)
             command_src_format;;
         --version)
@@ -85,7 +94,7 @@ handle_command(){
 }
 
 # parse arguments
-args=$(getopt -l 'version,install:,download:,config:,src-format::,help' -o vhc: -- "$@")
+args=$(getopt -l 'version,install:,list-installed,download:,config:,src-format::,help' -o vhlc: -- "$@")
 eval set -- "$args"
 while true; do
     case "$1" in
@@ -109,6 +118,10 @@ while true; do
                     [ "$php_band_command_to_run" != "" ] && php_band_multicommand_error
                     php_band_command_to_run="$1"
             esac
+            ;;
+        -l|--list-installed)
+            [ "$php_band_command_to_run" != "" ] && php_band_multicommand_error
+            php_band_command_to_run="$1"
             ;;
         -h|--help)
             show_usage
