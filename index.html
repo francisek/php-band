@@ -169,6 +169,17 @@ Its default value is defined to "--disable-all".</li>
 <em>PHP_BAND_SOURCE_DIR</em> Directory for all sources</li>
 <li>
 <em>php_band_php_install_dir</em> Directory into wich the current php will installed</li>
+<li>*php_version}} The full php version string (for example 5.6.3RC2)</li>
+<li>
+<em>php_version_major</em> The php major version (for example 5)</li>
+<li>
+<em>php_version_minor</em> The php minor version (for example 6)</li>
+<li>
+<em>php_version_patch</em> The php patch version (for example 3)</li>
+<li>
+<em>php_version_addon</em> The php version (for example RC2)</li>
+<li>
+<em>php_band_php_install_dir</em> The directory where php is installed</li>
 </ul>
 
 <h2>
@@ -186,6 +197,21 @@ Displays a message</li>
 <li>
 <em>get_per_version_config(base_config_filename [, major_version][, minor_version][,patch_version][, ...])</em>
 Sources all config files matching the version, starting from the less sibling.</li>
+<li>
+<em>php_band_substitute(filename)</em>
+Substitute placeholder with corresponding variable value.
+A placeholder is the name of the variable enclosed by double brackets.
+Most usefull placeholders are:
+
+<ul>
+<li>{{php_version}} The full php version string (for example 5.6.3RC2)</li>
+<li>{{php_version_major}} The php major version (for example 5)</li>
+<li>{{php_version_minor}} The php minor version (for example 6)</li>
+<li>{{php_version_patch}} The php patch version (for example 3)</li>
+<li>{{php_version_addon}} The php version (for example RC2)</li>
+<li>{{php_band_php_install_dir}} The directory where php is installed</li>
+</ul>
+</li>
 </ul>
 
 <h1>
