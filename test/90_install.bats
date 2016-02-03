@@ -2,19 +2,6 @@
 
 load test_helper
 
-@test "Call php-band to download an invalid version" {
-    run bin/php-band --download 10.20
-    assert_failure "The version format is not valid"
-    assert_status 1
-}
-
-@test "Call php-band to download a valid version but no existing PHP" {
-    run bin/php-band --download 10.10.20
-    assert_line_contains "Unable to download PHP source"
-    assert_status 2
-    [ ! -f arch/php-10.10.20.tar.xz ]
-}
-
 @test "Call php-band to install an already downloaded archive" {
     [ ! -f "archs/php-5.6.10.tar.xz" ]
     cp $BATS_TEST_DIRNAME/fixtures/php-5.6.10.tar.xz archs/
@@ -38,6 +25,9 @@ load test_helper
     [ -f "src/php-5.6.10/.configured" ]
     [ -f "src/php-5.6.10/.built" ]
     [ -f "inst/5.6.10/bin/php" ]
+    assert_status 0
+    run inst/5.6.10/bin/php -v
+    assert_line_contains "php 5.6.10"
     assert_status 0
 }
 

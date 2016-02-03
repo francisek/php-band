@@ -4,7 +4,7 @@ load test_helper
 
 @test "Call php-band with query version argument" {
     run bin/php-band --version
-    assert_output "0.0.1" 
+    assert_output "0.1.0" 
     assert_success
 }
 
@@ -18,5 +18,19 @@ load test_helper
     run bin/php-band --src-format --version
     assert_output "You must specify exactly one command" 
     assert_status 2
+}
+
+@test "List installed versions of php-band when none is installed" {
+    run bin/php-band --list-installed
+    assert_output ""
+    assert_status 0
+}
+
+@test "List installed versions of php-band when some are installed" {
+    mkdir inst/5.6.10 inst/5.6.2
+    run bin/php-band --list-installed
+    assert_output "5.6.2
+5.6.10"
+    assert_status 0
 }
 
