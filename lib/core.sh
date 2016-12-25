@@ -74,18 +74,35 @@ php_band_build_php_source_dirname() {
     printf "php-%s.%s.%s%s" "$php_version_major" "$php_version_minor" "$php_version_patch" "$php_version_addon" 
 }
 
+php_band_check_newer() {
+  local refFile="$1"
+  local testFile="$2"
+  [ -f "${refFile}" ] || return
+  [ -f "${testFile}" ] || return
+  if [ "${testFile}" -nt "${refFile}" ]; then
+    rm "${refFile}"
+  fi
+}
+
 get_per_version_config() {
     local base_config_file=$(basename "$1")
     local config_dir=$(dirname "$1")
+    local refFile="$PHP_BAND_SOURCE_DIR/"$(php_band_build_php_source_dirname)"/.configured"
     shift
     local x="$*"
-    [ -f "$config_dir/${base_config_file}" ] && source "$config_dir/$base_config_file" $x
+    if [ -f "$config_dir/${base_config_file}" ]; then
+      source "$config_dir/$base_config_file" $x
+      php_band_check_newer "${refFile}" "${config_dir}/${base_config_file}"
+    fi
     while [ $# -gt 0 -a "$1" != "" ]; do
         config_dir="$config_dir/$1"
-        [ -f "$config_dir/${base_config_file}" ] && source "$config_dir/${base_config_file}" $x
+        if [ -f "$config_dir/${base_config_file}" ]; then
+          echo "found config at $config_dir"
+          source "$config_dir/${base_config_file}" $x
+          php_band_check_newer "${refFile}" "${config_dir}/${base_config_file}"
+        fi
         shift
     done
-
 }
 
 php_band_configure_php() {
@@ -148,7 +165,7 @@ post_install_php() {
 
 php_band_compile_php() {
     echo "Installing $php_version"
-    
+    php_band_check_newer ".configured" "$0"
     cd "$PHP_BAND_SOURCE_DIR/"$(php_band_build_php_source_dirname)
     php_band_configure_php
     if [ ! -f .configured ]; then
@@ -161,7 +178,9 @@ php_band_compile_php() {
         post_configure_php
         touch .configured
     fi
+    php_band_check_newer ".built" ".configured"
     if [ ! -f .built ]; then
+        make clean
         pre_compile_php
         make
         [ $? -eq 0 ] || error_exit "Compilation of php failed" 3
