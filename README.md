@@ -44,6 +44,12 @@ if you want also to fully compile php while testing, you have to set the environ
 
 # The compilation process
 
+First of all, you can tell php-band to work in another directory than it's install dir by setting the environment variable PHP_BAND_ASSETS_DIR. This directory will be used to :
+
++ read custom configurations (in *config*)
++ download and extract php archives (in *src*)
++ install php versions (in *inst*)
+
 What does php-band is :
 
 + check the validity of the version

@@ -32,6 +32,11 @@ php_band_check_env() {
     [ "" != "$WGET_BIN" -a -x "$WGET_BIN" ] || error_exit "No wget binary" 1
     [ "" != "$SED_BIN" -a -x "$SED_BIN" ] || error_exit "No sed binary" 1
     [ "" != "$TAR_BIN" -a -x "$TAR_BIN" ] || error_exit "No tar binary" 1
+    [ -d "${PHP_BAND_ASSETS_DIR}" ] || error_exit "The asset directory '${PHP_BAND_ASSETS_DIR}' does not exist"
+    [ -d "$PHP_BAND_ARCH_DIR" ] || mkdir "${PHP_BAND_ARCH_DIR}"
+    [ -d "$PHP_BAND_CONFIG_DIR" ] || mkdir "${PHP_BAND_CONFIG_DIR}"
+    [ -d "$PHP_BAND_INST_DIR" ] || mkdir "${PHP_BAND_INST_DIR}"
+    [ -d "$PHP_BAND_SOURCE_DIR" ] || mkdir "${PHP_BAND_SOURCE_DIR}"
 }
 
 php_band_parse_version() {
