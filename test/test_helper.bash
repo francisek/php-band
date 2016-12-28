@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-export PHP_BAND_ASSETS_DIR=$(readlink -f $(pwd)/test/assets)
 export PHP_BAND_ASSETS_DIR=${BATS_TEST_DIRNAME}/assets
 setup() {
     find archs -type f -iname "php-5.6.10.*" -exec rm {} \;

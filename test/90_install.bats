@@ -16,7 +16,7 @@ load test_helper
     if [ "x$PHP_BAND_TEST_COMPILATION" = "x" ]; then
         skip "We only compile if PHP_BAND_TEST_COMPILATION is set"
     fi
-    run bin/php-band --install 5.6.10
+    PHP_BAND_ASSETS_DIR=$(dirname ${BATS_TEST_DIRNAME}) run bin/php-band --install 5.6.10
     assert_line_contains "PHP 5.6.10 has been downloaded"
     [ -f "archs/php-5.6.10.tar.xz" ]
     [ -d "src/php-5.6.10" ]
