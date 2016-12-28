@@ -4,10 +4,11 @@ PHP_BAND_NAME=$(basename "$0")
 pushd "$(dirname $0)" > /dev/null
 PHP_BAND_ROOT_DIR=$(dirname $(pwd -P))
 popd > /dev/null
-PHP_BAND_ARCH_DIR=${PHP_BAND_ROOT_DIR}/archs
-PHP_BAND_INST_DIR=${PHP_BAND_ROOT_DIR}/inst
-PHP_BAND_CONFIG_DIR=${PHP_BAND_ROOT_DIR}/config
-PHP_BAND_SOURCE_DIR=${PHP_BAND_ROOT_DIR}/src
+PHP_BAND_ASSETS_DIR=${PHP_BAND_ASSETS_DIR:-$PHP_BAND_ROOT_DIR}
+PHP_BAND_ARCH_DIR=${PHP_BAND_ASSETS_DIR}/archs
+PHP_BAND_INST_DIR=${PHP_BAND_ASSETS_DIR}/inst
+PHP_BAND_CONFIG_DIR=${PHP_BAND_ASSETS_DIR}/config
+PHP_BAND_SOURCE_DIR=${PHP_BAND_ASSETS_DIR}/src
 # local vars
 php_band_command_to_run=
 php_band_source_archive_format="xz"

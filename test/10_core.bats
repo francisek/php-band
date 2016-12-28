@@ -52,7 +52,7 @@ setup() {
 }
 
 @test "Test config per version from main config" {
-    local cfg="$BATS_TEST_DIRNAME/fixtures/test-config.sh"
+    local cfg="$PHP_BAND_ASSETS_DIR/config/test-config.sh"
 
     get_per_version_config "$cfg" "1" "20" "30" "RC40"
     assert_equals "$test_main" "test_main"
@@ -63,7 +63,7 @@ setup() {
 }
 
 @test "Test config per uncomplete version" {
-    local cfg="$BATS_TEST_DIRNAME/fixtures/test-config.sh"
+    local cfg="$PHP_BAND_ASSETS_DIR/config/test-config.sh"
 
     get_per_version_config "$cfg" 
     assert_equals "$test_main" "test_main"
@@ -74,7 +74,7 @@ setup() {
 }
 
 @test "Test config per version from specific config" {
-    local cfg="$BATS_TEST_DIRNAME/fixtures/test-config.sh"
+    local cfg="$PHP_BAND_ASSETS_DIR/config/test-config.sh"
 
     get_per_version_config "$cfg" "10" "20" "30" "RC40"
     assert_equals "$test_main" "test_main"
@@ -101,4 +101,22 @@ EOF
     php_band_substitute "$filename"
     result=$(cat "$filename")
     assert_equals "$result" "$expected"
+}
+
+@test "Check newer file" {
+  local file1="${BATS_TMPDIR}/check_newer_1"
+  local file2="${BATS_TMPDIR}/check_newer_2"
+  touch "$file2"
+  touch "$file1"
+  php_band_check_newer "$file1" "$file2"
+  [ -f "$file1" ]
+  [ -f "$file2" ]
+  touch "$file1"
+  php_band_check_newer "$file1" "$file2"
+  [ -f "$file1" ]
+  [ -f "$file2" ]
+  php_band_check_newer "qsddq" "$file2"
+  [ -f "$file2" ]
+  php_band_check_newer "$file1" "qsddq"
+  [ -f "$file1" ]
 }

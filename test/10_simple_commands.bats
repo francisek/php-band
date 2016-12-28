@@ -21,14 +21,14 @@ load test_helper
 }
 
 @test "List installed versions of php-band when none is installed" {
-    run bin/php-band --list-installed
+    PHP_BAND_ASSETS_DIR=$PHP_BAND_ASSETS_DIR run bin/php-band --list-installed
     assert_output ""
     assert_status 0
 }
 
 @test "List installed versions of php-band when some are installed" {
-    mkdir inst/5.6.10 inst/5.6.2
-    run bin/php-band --list-installed
+    mkdir ${PHP_BAND_ASSETS_DIR}/inst/5.6.10 ${PHP_BAND_ASSETS_DIR}/inst/5.6.2
+    PHP_BAND_ASSETS_DIR=$PHP_BAND_ASSETS_DIR run bin/php-band --list-installed
     assert_output "5.6.2
 5.6.10"
     assert_status 0
