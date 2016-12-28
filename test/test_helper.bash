@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+export PHP_BAND_ASSETS_DIR=$(readlink -f $(pwd)/test/assets)
+export PHP_BAND_ASSETS_DIR=${BATS_TEST_DIRNAME}/assets
 setup() {
     find archs -type f -iname "php-5.6.10.*" -exec rm {} \;
-    if [ -d src/php-5.6.10 ]; then
-        rm -rf src/php-5.6.10
+    if [ -d ${PHP_BAND_ASSETS_DIR}/src/php-5.6.10 ]; then
+        rm -rf ${PHP_BAND_ASSETS_DIR}/src/php-5.6.10
     fi
-    if [ -d inst/5.6.2 ]; then
-        rm -rf inst/5.6.2
+    if [ -d ${PHP_BAND_ASSETS_DIR}/inst/5.6.2 ]; then
+        rm -rf ${PHP_BAND_ASSETS_DIR}/inst/5.6.2
     fi
-    if [ -d inst/5.6.10 ]; then
-        rm -rf inst/5.6.10
+    if [ -d ${PHP_BAND_ASSETS_DIR}/inst/5.6.10 ]; then
+        rm -rf ${PHP_BAND_ASSETS_DIR}/inst/5.6.10
     fi
 }
 

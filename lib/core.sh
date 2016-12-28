@@ -77,8 +77,12 @@ php_band_build_php_source_dirname() {
 php_band_check_newer() {
   local refFile="$1"
   local testFile="$2"
-  [ -f "${refFile}" ] || return
-  [ -f "${testFile}" ] || return
+  if [ ! -f "${refFile}" ]; then
+    return
+  fi
+  if [ ! -f "${testFile}" ]; then
+    return
+  fi
   if [ "${testFile}" -nt "${refFile}" ]; then
     rm "${refFile}"
   fi
@@ -97,7 +101,6 @@ get_per_version_config() {
     while [ $# -gt 0 -a "$1" != "" ]; do
         config_dir="$config_dir/$1"
         if [ -f "$config_dir/${base_config_file}" ]; then
-          echo "found config at $config_dir"
           source "$config_dir/${base_config_file}" $x
           php_band_check_newer "${refFile}" "${config_dir}/${base_config_file}"
         fi

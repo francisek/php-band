@@ -49,14 +49,14 @@ What does php-band is :
 + check the validity of the version
 + if it does not exist, attempts to download the php archive from a list of prefered sites
 + if the php source directory does not exist, extract it from the archive into src directory
-+ switches to php tource directory
-+ reads per-version configuration
-+ if not already, configures php:
++ switches to php source directory
++ reads per-version configuration 
++ if not already done or any configuration is newer that marker file, configures php:
     + runs the *pre_configure_php()* function
     + runs configure
     + runs the *post_configure_php()* function if configure was successfull
     + marks the version as configured
-+ if not already compiled
++ if not already compiled or configuration marker file is newer than built marker
     + runs the *pre_compile_php()* function
     + compiles php
     + runs the *post_compile_php()* function if compilation was successfull
@@ -84,7 +84,7 @@ To get it clear, look at this example of config tree:
 
 php-band will use first *./config/configure-php.sh* for any version.
 Then if major version is 5, *./config/5/configure-php.sh* overrides the previous configuration.
-Then if major version is 5 and minor version is 6, *.config/5/6/configure-php.sh* overrides the previous configuration.
+Then if major version is 5 and minor version is 6, *.config/5/6/configure-php.sh* definitions will overrides the previous configuration.
 And so on ...
 
 ## What you can do
@@ -100,7 +100,9 @@ Its default value is defined to "--disable-all".
 + *post_configure_php()* is called after a successfull php's *configure*
 + *pre_compile_php()* is called before php's *make*
 + *post_compile_php()* is called after a successfull php's *make*
-+ *post_install_php()* is called after a successfull php's *make install*
++ *post_install_php()* is called after a successfull php's *make install*, usefull to create default config files
+
+The pre_\* and post_\* functions are called with the working directory set to the php source directory.
 
 ## Readonly variables
 
