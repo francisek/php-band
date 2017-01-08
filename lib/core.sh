@@ -55,17 +55,19 @@ php_band_parse_version() {
 # utilities
 php_band_apply_shell_expansion() {
     declare data=$1
+    declare PHP_BAND_DOLLAR='$'
     declare delimiter="__apply_shell_expansion_delimiter__"
     declare command="cat <<$delimiter"$'\n'"$data"$'\n'"$delimiter"
     eval "$command"
 }
 
-# Subst {{varname}} with ${varname}} 
+# Subst {{varname}} with ${varname} 
 # If no variable with that name exists, the placeholder is substed with empty string
 php_band_substitute() {
     local filename="$1"
     local v
-    v=$(sed -r -e "s/\{\{([^\}]+)\}\}/\${\1}/g" "$filename")
+    sed -r -i -e "s/\\\$/\${PHP_BAND_DOLLAR}/g" "${filename}"
+    v=$(sed -r -e "s/\{\{([^\}]+)\}\}/\${\1:-}/g" "${filename}")
     v=$(php_band_apply_shell_expansion "$v")
     echo "$v" > "$filename"
 }
