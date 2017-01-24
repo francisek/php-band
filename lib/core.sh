@@ -5,6 +5,11 @@ SED_BIN=$($WHICH_BIN sed)
 WGET_BIN=$($WHICH_BIN wget)
 TAR_BIN=$($WHICH_BIN tar)
 
+NPROC=$($WHICH_BIN nproc)
+MAKE_OPTS="-s"
+if [ "$NPROC" != "" ]; then
+    MAKE_OPTS="${MAKE_OPTS} -j$($NPROC)"
+fi
 
 error_exit() {
     local msg=$1
@@ -192,7 +197,7 @@ php_band_compile_php() {
     if [ ! -f .built ]; then
         make clean
         pre_compile_php
-        make
+        make ${MAKE_OPTS}
         [ $? -eq 0 ] || error_exit "Compilation of php failed" 3
         post_compile_php
         touch .built
