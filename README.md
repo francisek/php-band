@@ -122,7 +122,7 @@ Those variables can be used but should not be modified:
 + *php_version_minor* The php minor version (for example 6)
 + *php_version_patch* The php patch version (for example 3)
 + *php_version_addon* The php version (for example RC2)
-+ *php_band_php_install_dir* The directory where php is installed
++ *php_band_php_extension_dir* The directory where php looks extensions for. Available from the post_install_php() function.
 
 ## Usefull functions
 

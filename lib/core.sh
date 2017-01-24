@@ -152,6 +152,14 @@ php_band_extract_php_source() {
     [ $? -ne 0 ] && error_exit "$php_band_archive_filename does not seem to be a valid archive" 3
 }
 
+php_band_get_php_extension_dir() {
+    if [ -x "${php_band_php_install_dir}/bin/php-config" ]; then
+        php_band_php_extension_dir=$(${php_band_php_install_dir}/bin/php-config --extension-dir)
+    else
+        php_band_php_extension_dir=''
+    fi
+}
+
 pre_configure_php() {
     # Pre configure can be overriden in specific config files config-php.sh
     return
@@ -204,6 +212,7 @@ php_band_compile_php() {
     fi
     make install
     [ $? -eq 0 ] || error_exit "Installation of php failed" 3
+    php_band_get_php_extension_dir
     post_install_php
 }
 

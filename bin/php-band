@@ -25,6 +25,7 @@ php_prefered_sites=(
 # configurable options
 php_band_php_install_dir=
 php_band_php_config_options=
+php_band_php_extension_dir=
 
 source $PHP_BAND_ROOT_DIR/lib/core.sh
 # Commands
