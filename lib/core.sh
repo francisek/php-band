@@ -10,6 +10,8 @@ MAKE_OPTS="-s"
 if [ "$NPROC" != "" ]; then
     MAKE_OPTS="${MAKE_OPTS} -j$($NPROC)"
 fi
+declare -A PHP_BAND_CUSTOM_PECL_EXTENSIONS
+declare -A PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS
 
 error_exit() {
     local msg=$1
@@ -160,6 +162,81 @@ php_band_get_php_extension_dir() {
     fi
 }
 
+php_band_pecl_add_package() {
+    local package="$1"
+    local user_input=$2
+    if [ -z "${package}" ]; then
+        echo "Package name is mandatory"
+        return 1
+    fi
+    PHP_BAND_CUSTOM_PECL_EXTENSIONS[$package]=$user_input
+    return 0
+}
+
+php_band_pecl_remove_package() {
+    local package="$1"
+    if [ -z "${package}" ]; then
+        echo "Package name is mandatory"
+        return 1
+    fi
+    unset PHP_BAND_CUSTOM_PECL_EXTENSIONS[$package]
+    return 0
+}
+
+php_band_pecl_build_extension() {
+    local ext_channel="$1"
+    local user_input="${2}"
+    log_info "Building pecl extension ${ext_channel}"
+    echo "${user_input}" | ${php_band_php_install_dir}/bin/pecl install "${ext_channel}" # > /dev/null
+    [ -z $? ] || log_info "Extension building failed"
+}
+
+php_band_pecl_build() {
+    local cwd="$(pwd)"
+    echo "Pecl Extensions to install : ${!PHP_BAND_CUSTOM_PECL_EXTENSIONS[@]}"
+    for pecl_channel in ${!PHP_BAND_CUSTOM_PECL_EXTENSIONS[*]} ; do
+        echo "Pecl extension $pecl_channel requested"
+		cd "$cwd"
+        custom_build_pecl_extension "$pecl_channel" "${PHP_BAND_CUSTOM_PECL_EXTENSIONS[${pecl_channel}]}"
+    done
+    cd "$cwd"
+}
+
+php_band_external_add() {
+    local name="$1"
+    local args=("${@:2}")
+    if [ -z "$name" ]; then
+        echo "External name is required"
+        return 1
+    fi
+    PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[$name]=${args[*]}
+    return 0
+}
+
+php_band_external_remove() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo "External name is required"
+        return 1
+    fi
+    unset PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[$name]
+    return 0
+}
+
+php_band_external_build() {
+    local cwd="$(pwd)"
+    echo "External Extensions to install : ${!PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[@]}"
+    for ext_et in ${!PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[*]} ; do
+        echo "Building extension $ext_et with ${PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[$ext_et]}"
+		cd "$cwd"
+        command_to_run="extension_${ext_et}"
+        if [ "$(type -t "$command_to_run")" = "function" ]; then
+            command_params=${PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[$ext_et]}
+            $command_to_run ${command_params[@]}
+        fi
+    done
+}
+
 pre_configure_php() {
     # Pre configure can be overriden in specific config files config-php.sh
     return
@@ -214,5 +291,7 @@ php_band_compile_php() {
     [ $? -eq 0 ] || error_exit "Installation of php failed" 3
     php_band_get_php_extension_dir
     post_install_php
+    php_band_pecl_build
+    php_band_external_build
 }
 

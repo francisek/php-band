@@ -46,7 +46,7 @@ EOM
 }
 
 command_version() {
-    echo "0.2.0"
+    echo "0.3.0"
     exit 0
 }
 
