@@ -187,8 +187,8 @@ php_band_pecl_build_extension() {
     local ext_channel="$1"
     local user_input="${2}"
     log_info "Building pecl extension ${ext_channel}"
-    echo "${user_input}" | ${php_band_php_install_dir}/bin/pecl install "${ext_channel}" # > /dev/null
-    [ -z $? ] || log_info "Extension building failed"
+    echo "${user_input}" | ${php_band_php_install_dir}/bin/pecl install "${ext_channel}" > /dev/null
+    [ $? -eq 0 ] || log_info "Extension building failed"
 }
 
 php_band_pecl_build() {
@@ -197,7 +197,7 @@ php_band_pecl_build() {
     for pecl_channel in ${!PHP_BAND_CUSTOM_PECL_EXTENSIONS[*]} ; do
         echo "Pecl extension $pecl_channel requested"
 		cd "$cwd"
-        custom_build_pecl_extension "$pecl_channel" "${PHP_BAND_CUSTOM_PECL_EXTENSIONS[${pecl_channel}]}"
+        php_band_pecl_build_extension "$pecl_channel" "${PHP_BAND_CUSTOM_PECL_EXTENSIONS[${pecl_channel}]}"
     done
     cd "$cwd"
 }
