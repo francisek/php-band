@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Pecl called with '$@'"
+exit 0

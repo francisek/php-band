@@ -1,6 +1,7 @@
 # php-band
 
 <img src="https://circleci.com/gh/francisek/php-band/tree/master.svg?style=shield&circle-token=0e2b5681405bbc52e77bce982d74c449b46636d8" />
+[![Code Climate](https://codeclimate.com/github/francisek/php-band/badges/gpa.svg)](https://codeclimate.com/github/francisek/php-band)
 
 A simple bash tool to compile php versions
 
