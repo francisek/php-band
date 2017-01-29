@@ -1,6 +1,7 @@
 # php-band
 
 <img src="https://circleci.com/gh/francisek/php-band/tree/master.svg?style=shield&circle-token=0e2b5681405bbc52e77bce982d74c449b46636d8" />
+[![Code Climate](https://codeclimate.com/github/francisek/php-band/badges/gpa.svg)](https://codeclimate.com/github/francisek/php-band)
 
 A simple bash tool to compile php versions
 
@@ -69,6 +70,8 @@ What does php-band is :
     + marks the version as built
 + installs php to inst/<version>
 + runs *post_install_php()* function if installation was successfull
++ builds pecl extensions
++ builds external extensions
 
 # Custom configuration
 
@@ -110,19 +113,108 @@ Its default value is defined to "--disable-all".
 
 The pre_\* and post_\* functions are called with the working directory set to the php source directory.
 
+## Building extensions
+
+Extensions are built and installed after php itself.
+
+It is of your responsability to provide the loading and parameters of the extension to php, generally by creating an extension_name.ini file in the `${php_band_php_install_dir}/conf.d/` directory.
+
+### Using pecl
+
+You add some pecl extensions to build in your *configure-php.sh* file by using the function *php_band_pecl_add_package*.
+It takes the package name as first parameter and eventually a string representing user inputs as second parameter.
+The pecl package name must be a string accordingly to [pecl documentation](http://php.net/manual/en/install.pecl.pear.php).
+For example to install the xdebug package, use either :
+
+```
+php_band_pecl_add_package 'xdebug'
+```
+
+or
+
+```
+php_band_pecl_add_package 'xdebug-2.5.0'
+```
+
+or
+
+```
+php_band_pecl_add_package 'pecl.php.net/xdebug-stable'
+```
+
+You may know some extensions defined in a lower config file are not compatible with a specific version (for example, xhprof does not work on 7.x).
+You can remove the building extension request with the function *php_band_pecl_remove_package* :
+
+```
+php_band_pecl_remove_package 'xhprof'
+```
+
+### Building custom extensions
+
+You can request building a custom extension with function *php_band_external_add*.
+It takes a request identifer string as first parameter. Any other parameter will be passed to a callback function of your own named *extension_<identifier>*.
+
+For example, let's build the extension xhprof. The pecl version builds untin php 5.99.
+Our `config/configure-php.sh` may look like:
+
+```bash
+#!/bin/bash -e
+
+php_band_pecl_add_package 'xhprof-stable'
+```
+
+In the `config/7/configure-php.sh` file we won't install pecl version but the git version from branch 'php7':
+
+```bash
+#!/bin/bash -e
+
+php_band_pecl_remove_package 'xhprof-stable'
+php_band_external_add 'custom_xhprof' 'https://github.com/RustJason/xhprof.git' 'php7'
+
+# @param $1 Git repository
+# @param $2 Git branch
+extension_custom_xhprof() {
+    local repo="$1"
+    local branch="${2:-master}"
+    local xhprof_src_dir="${PHP_BAND_SOURCE_DIR}/$(php_band_build_php_source_dirname)/ext/xhprof"
+
+    if [ -f "${php_band_php_extension_dir}/xhprof.so" ]; then
+        echo "Xhprof already installed"
+        return 0
+    fi
+
+    [ -d "$xhprof_src_dir" ] && rm -rf "$xhprof_src_dir"
+    git clone --depth 1 --branch "$branch" $repo "${xhprof_src_dir}"
+    cd "$xhprof_src_dir/extension"
+    ${php_band_php_install_dir}/bin/phpize
+    ./configure --with-php-config=${php_band_php_install_dir}/bin/php-config
+    make ${MAKE_OPTS} && make install
+
+    echo "extension=${php_band_php_extension_dir}/xhprof.so" > ${php_band_php_install_dir}/conf.d/xhprof.ini
+}
+```
+
+And finally there is no current branch working with PHP 7.1 line, so our file `config/7/1/configure-php.sh` would look like:
+
+```bash
+#!/bin/bash -e
+
+php_band_external_remove 'custom_xhprof'
+```
+
 ## Readonly variables
 
 Those variables can be used but should not be modified:
 
 + *PHP_BAND_INST_DIR* Directory for all installations
 + *PHP_BAND_SOURCE_DIR* Directory for all sources
-+ *php_band_php_install_dir* Directory into wich the current php will installed
++ *php_band_php_install_dir* Directory into which the current php version will be installed
 + *php_version* The full php version string (for example 5.6.3RC2)
 + *php_version_major* The php major version (for example 5)
 + *php_version_minor* The php minor version (for example 6)
 + *php_version_patch* The php patch version (for example 3)
 + *php_version_addon* The php version (for example RC2)
-+ *php_band_php_install_dir* The directory where php is installed
++ *php_band_php_extension_dir* The directory where php looks extensions for. Available from the post_install_php() stage.
 
 ## Usefull functions
 
@@ -144,6 +236,9 @@ Some core functions may be usefull in your functions :
   + {{php_version_patch}} The php patch version (for example 3)
   + {{php_version_addon}} The php version (for example RC2)
   + {{php_band_php_install_dir}} The directory where php is installed
+  + {{php_band_php_extension_dir}} The directory where php loads its extensions. Available after installation.
++ *php_band_build_php_source_dirname()*
+  Returns the php dirname where php sources resides. This is used in conjonction with *${PHP_BAND_SOURCE_DIR}*
 
 # Best practises in writing configuration files
 

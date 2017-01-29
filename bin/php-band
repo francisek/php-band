@@ -1,8 +1,8 @@
 #!/bin/bash
 
 PHP_BAND_NAME=$(basename "$0")
-pushd "$(dirname $0)" > /dev/null
-PHP_BAND_ROOT_DIR=$(dirname $(pwd -P))
+pushd "$(dirname "$0")" > /dev/null
+PHP_BAND_ROOT_DIR=$(dirname "$(pwd -P)")
 popd > /dev/null
 PHP_BAND_ASSETS_DIR=${PHP_BAND_ASSETS_DIR:-$PHP_BAND_ROOT_DIR}
 PHP_BAND_ARCH_DIR=${PHP_BAND_ASSETS_DIR}/archs
@@ -18,6 +18,7 @@ php_version_major=
 php_version_minor=
 php_version_patch=
 php_version_addon=
+# shellcheck disable=SC2016
 php_prefered_sites=(
     'http://museum.php.net/php${php_version_major}/${php_band_archive_filename}' 
     'http://docs.php.net/distributions/${php_band_archive_filename}'
@@ -25,7 +26,8 @@ php_prefered_sites=(
 # configurable options
 php_band_php_install_dir=
 php_band_php_config_options=
-
+php_band_php_extension_dir=
+# shellcheck source=lib/core.sh
 source $PHP_BAND_ROOT_DIR/lib/core.sh
 # Commands
 
@@ -45,13 +47,13 @@ EOM
 }
 
 command_version() {
-    echo "0.2.0"
+    echo "0.3.0"
     exit 0
 }
 
 command_download() {
     php_band_parse_version $php_version
-    if [ "$php_version_major" = "" -o "$php_version_minor" = "" -o "$php_version_patch" = "" ]; then
+    if [ "$php_version_major" = "" ] || [ "$php_version_minor" = "" ] || [ "$php_version_patch" = "" ] ; then
         error_exit "The version format is not valid" 1
     fi
     php_band_build_source_filename
@@ -70,7 +72,8 @@ command_src_format() {
 }
 
 command_list_installed() {
-    local list=$(ls -1bv "$PHP_BAND_INST_DIR")
+    local list
+    list=$(ls -1bv "$PHP_BAND_INST_DIR")
     if [ "$list" != "" ]; then
         log_info "$list"
     fi

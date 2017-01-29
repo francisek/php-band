@@ -1,5 +1,10 @@
 # Changelog
 
+0.3.0 :
+
+- Added variable `php_band_php_extension_dir`
+- Added extension building support
+
 0.2.0 : 
 
 - Added a check of configuration files modification date to rebuild

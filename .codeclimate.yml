@@ -1,0 +1,17 @@
+---
+engines:
+  fixme:
+    enabled: false
+  shellcheck:
+    enabled: true
+ratings:
+  paths:
+  - "**.sh"
+  - "bin/php-band"
+exclude_paths:
+- archs/
+- config/
+- test/
+- inst/
+- src/
+
