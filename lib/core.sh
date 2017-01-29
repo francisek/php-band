@@ -140,7 +140,7 @@ php_band_check_for_source() {
         log_info "Attempting to download from $host"
         $WGET_BIN -P "$PHP_BAND_ARCH_DIR" -O "$srcfile" "$host"
         if [ -f "$srcfile" ]; then
-          $TAR_BIN -tf "$srcfile" 2>&1 > /dev/null
+          $TAR_BIN -tf "$srcfile" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             rm "$srcfile"
           fi
