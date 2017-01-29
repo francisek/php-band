@@ -1,7 +1,9 @@
 # php-band
 
-<img src="https://circleci.com/gh/francisek/php-band/tree/master.svg?style=shield&circle-token=0e2b5681405bbc52e77bce982d74c449b46636d8" />
-[![Code Climate](https://codeclimate.com/github/francisek/php-band/badges/gpa.svg)](https://codeclimate.com/github/francisek/php-band)
+[![CircleCI token](https://img.shields.io/circleci/token/0e2b5681405bbc52e77bce982d74c449b46636d8/project/github/francisek/php-band/master.svg?style=plastic)]()
+[![Code Climate](https://img.shields.io/codeclimate/github/francisek/php-band.svg?style=plastic)]()
+[![Code Climate Issues](https://img.shields.io/codeclimate/issues/github/francisek/php-band.svg?style=plastic)]()
+[![GitHub tag](https://img.shields.io/github/tag/francisek/php-band.svg?style=plastic)]()
 
 A simple bash tool to compile php versions
 
