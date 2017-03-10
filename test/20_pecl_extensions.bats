@@ -10,7 +10,8 @@ setup() {
   local output
   php_band_php_install_dir="${BATS_TEST_DIRNAME}/mock"
   output=$(php_band_pecl_build_extension 'test')
-  assert_equals "Building pecl extension test" "$output"
+  assert_contains "Building pecl extension test" "$output"
+  assert_contains "Extension building failed" "$output"
 }
 
 @test "Request installation of a pecl extension" {
