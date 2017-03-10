@@ -119,13 +119,20 @@ The pre_\* and post_\* functions are called with the working directory set to th
 
 Extensions are built and installed after php itself.
 
-It is of your responsability to provide the loading and parameters of the extension to php, generally by creating an extension_name.ini file in the `${php_band_php_install_dir}/conf.d/` directory.
+It is of your responsability to provide the loading and parameters of the extension to php, generally by either:
+
+- create a post extension build callback
+- create an extension_name.ini file in the `${php_band_php_install_dir}/conf.d/` directory.
 
 ### Using pecl
 
 You add some pecl extensions to build in your *configure-php.sh* file by using the function *php_band_pecl_add_package*.
-It takes the package name as first parameter and eventually a string representing user inputs as second parameter.
-The pecl package name must be a string accordingly to [pecl documentation](http://php.net/manual/en/install.pecl.pear.php).
+It takes the following arguments:
+
+- the package name as first parameter is mandatory. Refer to [pecl documentation](http://php.net/manual/en/install.pecl.pear.php) for available formats ;
+- an optionnal string representing user inputs as second parameter. Add a newline character `\n` after each simulated user answer ;
+- an optionnal post build callback name. The default value is `post_pecl_<package name>_build`. If the function exists it will be called on successfull build.
+
 For example to install the xdebug package, use either :
 
 ```
@@ -135,13 +142,13 @@ php_band_pecl_add_package 'xdebug'
 or
 
 ```
-php_band_pecl_add_package 'xdebug-2.5.0'
+php_band_pecl_add_package 'xdebug-2.5.0' '' 'post_pecl_xhprof_build'
 ```
 
 or
 
 ```
-php_band_pecl_add_package 'pecl.php.net/xdebug-stable'
+php_band_pecl_add_package 'pecl.php.net/xdebug-stable' '' 'post_pecl_xhprof_build'
 ```
 
 You may know some extensions defined in a lower config file are not compatible with a specific version (for example, xhprof does not work on 7.x).
@@ -162,7 +169,11 @@ Our `config/configure-php.sh` may look like:
 ```bash
 #!/bin/bash -e
 
-php_band_pecl_add_package 'xhprof-stable'
+php_band_pecl_add_package 'xhprof-stable' '' 'post_pecl_xhprof_build'
+
+post_pecl_xhprof_build() {
+    echo 'extension=xhprof.so' > "${php_band_php_install_dir}/conf.d/xhprof.ini"
+}
 ```
 
 In the `config/7/configure-php.sh` file we won't install pecl version but the git version from branch 'php7':
@@ -192,7 +203,7 @@ extension_custom_xhprof() {
     ./configure --with-php-config=${php_band_php_install_dir}/bin/php-config
     make ${MAKE_OPTS} && make install
 
-    echo "extension=${php_band_php_extension_dir}/xhprof.so" > ${php_band_php_install_dir}/conf.d/xhprof.ini
+    echo "extension=xhprof.so" > ${php_band_php_install_dir}/conf.d/xhprof.ini
 }
 ```
 
