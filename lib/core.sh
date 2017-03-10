@@ -135,7 +135,7 @@ php_band_check_for_source() {
     php_band_archive_filename=$(php_band_build_source_filename) 
     srcfile="$PHP_BAND_ARCH_DIR/$php_band_archive_filename"
     [ -f "$srcfile" ] && [ -s "$srcfile" ] && return
-    for i in "${php_prefered_sites[@]}" ; do
+    for i in "${php_prefered_sites[@]:?}" ; do
         host=$(php_band_apply_shell_expansion "${i%%}")
         log_info "Attempting to download from $host"
         $WGET_BIN -P "$PHP_BAND_ARCH_DIR" -O "$srcfile" "$host"
@@ -196,7 +196,6 @@ php_band_pecl_build_extension() {
     local user_input="${2}"
     local post_install="${3:-post_pecl_$1_build}"
     local build_output
-    local build_status
     log_info "Building pecl extension ${ext_channel}"
     build_output=$(echo -e "${user_input}" | "${php_band_php_install_dir}"/bin/pecl install "${ext_channel}" 2>&1)
     if [ "" != "$(echo "${build_output}" | grep -i "Build process completed successfully")" ]; then
