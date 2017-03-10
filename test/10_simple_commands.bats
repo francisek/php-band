@@ -4,7 +4,7 @@ load test_helper
 
 @test "Call php-band with query version argument" {
     run bin/php-band --version
-    assert_output "0.3.0" 
+    assert_output "0.4.0" 
     assert_success
 }
 

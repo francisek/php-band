@@ -135,7 +135,7 @@ php_band_check_for_source() {
     php_band_archive_filename=$(php_band_build_source_filename) 
     srcfile="$PHP_BAND_ARCH_DIR/$php_band_archive_filename"
     [ -f "$srcfile" ] && [ -s "$srcfile" ] && return
-    for i in "${php_prefered_sites:?[@]}" ; do
+    for i in "${php_prefered_sites[@]:?}" ; do
         host=$(php_band_apply_shell_expansion "${i%%}")
         log_info "Attempting to download from $host"
         $WGET_BIN -P "$PHP_BAND_ARCH_DIR" -O "$srcfile" "$host"
@@ -172,12 +172,12 @@ php_band_get_php_extension_dir() {
 
 php_band_pecl_add_package() {
     local package="$1"
-    local user_input=$2
+    local options=(${@:2})
     if [ -z "${package}" ]; then
         echo "Package name is mandatory"
         return 1
     fi
-    PHP_BAND_CUSTOM_PECL_EXTENSIONS[$package]=$user_input
+    PHP_BAND_CUSTOM_PECL_EXTENSIONS[$package]=${options[*]}
     return 0
 }
 
@@ -194,20 +194,36 @@ php_band_pecl_remove_package() {
 php_band_pecl_build_extension() {
     local ext_channel="$1"
     local user_input="${2}"
+    local post_install="${3:-post_pecl_$1_build}"
+    local build_output
     log_info "Building pecl extension ${ext_channel}"
-    echo "${user_input}" | "${php_band_php_install_dir}"/bin/pecl install "${ext_channel}" > /dev/null
-    [ $? -eq 0 ] || log_info "Extension building failed"
+    build_output=$(echo -e "${user_input}" | "${php_band_php_install_dir}"/bin/pecl install "${ext_channel}" 2>&1)
+    if [ "" != "$(echo "${build_output}" | grep -i "Build process completed successfully")" ]; then
+        log_info "  Extension built successfully"
+    elif [ "" != "$(echo "${build_output}" | grep -i "already installed")" ]; then
+        log_info "  Extension already built"
+    else
+        log_info "  Extension building failed $(echo "${build_output}" | grep -i 'error')"
+        return
+    fi
+
+    if [ -n "${post_install}" ] && [ "$(type -t "${post_install}")" = "function" ]; then
+        log_info "  Calling post built action ${post_install}"
+        ${post_install}
+    fi
 }
 
 php_band_pecl_build() {
     local cwd
+    local pecl_args
     cwd="$(pwd)"
     echo "Pecl Extensions to install : ${!PHP_BAND_CUSTOM_PECL_EXTENSIONS[*]}"
     for pecl_channel in ${!PHP_BAND_CUSTOM_PECL_EXTENSIONS[*]} ; do
         echo "Pecl extension $pecl_channel requested"
         # shellcheck disable=SC2164
         cd "$cwd"
-        php_band_pecl_build_extension "$pecl_channel" "${PHP_BAND_CUSTOM_PECL_EXTENSIONS[${pecl_channel}]}"
+        pecl_args=${PHP_BAND_CUSTOM_PECL_EXTENSIONS[${pecl_channel}]}
+        php_band_pecl_build_extension "$pecl_channel" ${pecl_args[@]}
     done
     # shellcheck disable=SC2164
     cd "$cwd"
@@ -245,7 +261,7 @@ php_band_external_build() {
         command_to_run="extension_${ext_et}"
         if [ "$(type -t "$command_to_run")" = "function" ]; then
             command_params=${PHP_BAND_CUSTOM_EXTERNAL_EXTENSIONS[$ext_et]}
-            $command_to_run "${command_params[@]}"
+            $command_to_run ${command_params[@]}
         fi
     done
 }
