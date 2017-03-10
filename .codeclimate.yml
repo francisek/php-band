@@ -4,6 +4,10 @@ engines:
     enabled: false
   shellcheck:
     enabled: true
+    exclude_fingerprints:
+      - f3a504d17f12f40fdd844596ffdbf736
+      - 4ccff9eccea3fa979ffe68b8945f0891
+      - 46c633c75fd34040d1a09071df1fd691
 ratings:
   paths:
   - "**.sh"
